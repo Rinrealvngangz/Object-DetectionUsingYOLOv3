@@ -2,7 +2,8 @@
 
 ## Technologies
 
-- Alturos.Yolo
+- Alturos.Yolo version 3.0.6-alpha
+- Alturos.YoloV2TinyVocData.1.0.0 
 - Background we are use the Windows Yolo version of [AlexeyAB/darknet](https://github.com/AlexeyAB/darknet)
 
 ## Version 1
