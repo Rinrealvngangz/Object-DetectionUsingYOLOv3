@@ -13,6 +13,7 @@
 
 ## Requirements
 - .NetFramework 4.7.2
+- Platform x64
 - Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 und 2019 x64
 
 ## Tools
