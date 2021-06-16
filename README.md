@@ -4,12 +4,21 @@
 
 - Alturos.Yolo version 3.0.6-alpha
 - Alturos.YoloV2TinyVocData.1.0.0 
+- OpenCvSharp3-AnyCPU ver 4.0.0 stable
 - Background we are use the Windows Yolo version of [AlexeyAB/darknet](https://github.com/AlexeyAB/darknet)
 
 ## Version 1
 
 - Get Image from file 
 - Detec image and display 
+
+## Version 2
+
+- Count number of vehicle by type
+
+## Version 3
+
+- Detection video realtime using OpenCvSharp3
 
 ## Requirements
 - .NetFramework 4.7.2
