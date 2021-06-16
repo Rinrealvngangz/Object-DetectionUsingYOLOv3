@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\build\OpenCvSharp3-AnyCPU.props" Condition="Exists('..\packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\build\OpenCvSharp3-AnyCPU.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -38,6 +39,19 @@
     <Reference Include="Alturos.Yolo, Version=3.0.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Alturos.Yolo.3.0.6-alpha\lib\net461\Alturos.Yolo.dll</HintPath>
     </Reference>
+    <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\lib\net461\OpenCvSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp.Blob, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\lib\net461\OpenCvSharp.Blob.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp.Extensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\lib\net461\OpenCvSharp.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp.UserInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\lib\net461\OpenCvSharp.UserInterface.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +63,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Form1.cs">
@@ -95,6 +110,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Alturos.YoloV2TinyVocData.1.0.0\build\net46\Alturos.YoloV2TinyVocData.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Alturos.YoloV2TinyVocData.1.0.0\build\net46\Alturos.YoloV2TinyVocData.targets'))" />
     <Error Condition="!Exists('..\packages\Alturos.Yolo.3.0.6-alpha\build\Alturos.Yolo.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Alturos.Yolo.3.0.6-alpha\build\Alturos.Yolo.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\build\OpenCvSharp3-AnyCPU.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCvSharp3-AnyCPU.4.0.0.20181129\build\OpenCvSharp3-AnyCPU.props'))" />
   </Target>
   <Import Project="..\packages\Alturos.YoloV2TinyVocData.1.0.0\build\net46\Alturos.YoloV2TinyVocData.targets" Condition="Exists('..\packages\Alturos.YoloV2TinyVocData.1.0.0\build\net46\Alturos.YoloV2TinyVocData.targets')" />
   <Import Project="..\packages\Alturos.Yolo.3.0.6-alpha\build\Alturos.Yolo.targets" Condition="Exists('..\packages\Alturos.Yolo.3.0.6-alpha\build\Alturos.Yolo.targets')" />
