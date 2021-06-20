@@ -7,8 +7,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -22,6 +20,16 @@ namespace objectDetection
         public Form1()
         {
             InitializeComponent();
+           
+            this.BackColor = System.Drawing.Color.FromArgb(32, 32, 32); 
+          panel3.BackColor = System.Drawing.Color.FromArgb(32, 32, 32); 
+            panel2.BackColor = System.Drawing.Color.FromArgb(32, 32, 32);
+            panel1.BackColor = System.Drawing.Color.FromArgb(32, 32, 32);
+            picBoxImageForDetec.BackColor = System.Drawing.Color.FromArgb(32, 32, 32);
+          btnImage.BackColor = System.Drawing.Color.FromArgb(28, 28, 28);
+            btnDetection.BackColor = System.Drawing.Color.FromArgb(28, 28, 28);
+            pictureBoxIpl1.BackColor = System.Drawing.Color.FromArgb(32, 32, 32);
+            playVideo.BackColor = System.Drawing.Color.FromArgb(28, 28, 28);
         }
 
         const string UNKOWN = "unknown key";
@@ -48,13 +56,11 @@ namespace objectDetection
 
         private readonly static string weights = Path.Combine(Location, Weight);
 
-        // Init Yolov3-tiny
-        //  private readonly static YoloWrapper yoloWrapper = new YoloWrapper(config, weights, label);
-
+     
         private readonly static Scalar colorCount = Scalar.Yellow;
         // Color Random
         private static readonly Scalar[] Colors = Enumerable.Repeat(false, 80).Select(x => Scalar.RandomColor()).ToArray();
-      //  int countCar, countBicycle, countBus, countMoto, countTruck, countTrain = 0;
+       static int countCar, countBicycle, countBus, countMoto, countTruck, countTrain = 0;
       
         private static readonly List<string> Labels = File.ReadAllLines(label,Encoding.UTF8).ToList();
 
@@ -166,12 +172,12 @@ namespace objectDetection
             if (openFile.ShowDialog() == DialogResult.OK)
             {
                 filePath = openFile.FileName;
-              /*  countCar = 0;
+                countCar = 0;
                 countBicycle = 0;
                 countBus = 0;
                 countMoto = 0;
                 countTruck = 0;
-                countTrain = 0;*/
+                countTrain = 0;
             }
 
         }
@@ -199,100 +205,13 @@ namespace objectDetection
                 var countVehicle = $"Vehicle count: {count}";
                 org.PutText(countVehicle, new OpenCvSharp.Point(0, 50), HersheyFonts.HersheyTriplex, 1, colorCount);
                 picBoxImageForDetec.Image = BitmapConverter.ToBitmap(org);
-
+               
             }
 
-            //    var image = Image.FromFile(filePath);
+                     
 
 
-            /*  using (var grap = Graphics.FromImage(image))
-               {
-                   ArrayList listVehicle = new ArrayList();
-                   foreach (var item in items.ToList())
-                   {
-                       if (!listVehicle.Contains(item.Type))
-                       {
-                           listVehicle.Add(item.Type);
-                       }
-                       if (item.Type != UNKOWN && item.Type != PERSON)
-                       {
-                           switch (item.Type)
-                           {
-                               case "car":
-                                   countCar++;
-                                   break;
-                               case "bus":
-                                   countBus++;
-                                   break;
-                               case "bicycle":
-                                   countBicycle++;
-                                   break;
-                               case "motorbike":
-                                   countMoto++;
-                                   break;
-                               case "train":
-                                   countTrain++;
-                                   break;
-                               case "truck":
-                                   countTruck++;
-                                   break;
-                               default:
-                                   break;
-                           }
-
-                           using (var pen = new System.Drawing.Pen(System.Drawing.Color.Red, 3))
-                           {
-                               grap.DrawRectangle(pen, item.X, item.Y, item.Width, item.Height);
-                               Font font = new Font("Meiryo UI", 15);
-                               SolidBrush brush = new SolidBrush(System.Drawing.Color.Green);
-                               grap.DrawString(item.Type.ToString(), font, brush, item.X, item.Y);
-                               grap.DrawString(Math.Round(item.Confidence * 100).ToString() + "%", new Font("Meiryo UI", 25), new SolidBrush(System.Drawing.Color.Purple), item.X + (item.Width - 50), item.Y + (item.Height / 2));
-                               grap.Flush();
-                           }
-                       }
-
-                   }
-                   int index = 0;
-                   for (int i = 0; i < listVehicle.Count; i++)
-                   {
-
-                       switch (listVehicle[i])
-                       {
-
-                           case "car":
-                               grap.DrawString(listVehicle[i] + ": " + countCar, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                               index += 40;
-                               break;
-                           case "bus":
-                               grap.DrawString(listVehicle[i] + ": " + countBus, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                               index += 40;
-                               break;
-                           case "bicycle":
-                               grap.DrawString(listVehicle[i] + ": " + countBicycle, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                               index += 40;
-                               break;
-                           case "motorbike":
-                               grap.DrawString(listVehicle[i] + ": " + countMoto, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                               index += 40;
-                               break;
-                           case "train":
-                               grap.DrawString(listVehicle[i] + ": " + countTrain, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                               index += 40;
-                               break;
-                           case "truck":
-                               grap.DrawString(listVehicle[i] + ": " + countTruck, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                               index += 40;
-                               break;
-                           default:
-                               break;
-                       }
-
-                   }
-
-               }*/
-
-
-
+           
         }
     
         /// <summary>
@@ -307,43 +226,73 @@ namespace objectDetection
         private static void Draw(Mat image, string item, float confidence,  double centerX, double centerY, double width, double height)
         {
             //label formating
-          
             var label = $"{item} {confidence * 100:0.00}%";
             var ranColor = Labels.IndexOf(item);
             //draw result
             image.Rectangle(new OpenCvSharp.Point(centerX, centerY ), new OpenCvSharp.Point(centerX + width, centerY + height), Colors[ranColor], 2);
-          var textSize = Cv2.GetTextSize(label, HersheyFonts.HersheyTriplex, 0.5, 1, out var baseline);
+            var textSize = Cv2.GetTextSize(label, HersheyFonts.HersheyTriplex, 0.5, 1, out var baseline);
             Cv2.Rectangle(image, new Rect(new OpenCvSharp.Point(centerX, centerY - textSize.Height),
-              new OpenCvSharp.Size(textSize.Width, textSize.Height + baseline)), Colors[ranColor], Cv2.FILLED);
+                new OpenCvSharp.Size(textSize.Width, textSize.Height + baseline)), Colors[ranColor], Cv2.FILLED);
             var textColor = Cv2.Mean(Colors[ranColor]).Val0 < 70 ? Scalar.White : Scalar.Black;
-         
-          
             Cv2.PutText(image,  label, new OpenCvSharp.Point(centerX, centerY ), HersheyFonts.HersheyTriplex, 0.5, textColor);
         }
       
 
-        private static void GetValueInImage(IEnumerable<Alturos.Yolo.Model.YoloItem> items ,Mat image)
+        private  void GetValueInImage(IEnumerable<Alturos.Yolo.Model.YoloItem> items ,Mat image)
         {
             
             foreach (var item in items)
             {
                 if (item.Type != UNKOWN && item.Type != PERSON)
                 {
-                    count++;
-                 
+
+                    count++;    
                     var x = item.X;
                     var y = item.Y;
                     var width = item.Width;
                     var height = item.Height;
-                    var type = item.Type;  // class name of the object
-                                           // draw a bounding box for the detected object
-                                           // you can set different colors for different classes
+                    var type = item.Type;
                     Draw(image, type, (float)item.Confidence, x, y, width, height);
+                    CountVehicle(item.Type);
                 }
             }
 
         }
+         void  CountVehicle(string item)
+        {
+                  
+                switch (item)
+                {
+                    case "car":
+                        countCar++;
+                    lbCountCar.Text = countCar.ToString();
+                        break;
+                    case "bus":
+                        countBus++;
+                   lbCountBus.Text = countBus.ToString();
+                    break;
+                    case "bicycle":
+                        countBicycle++;
+                    lbCountBicycle.Text = countBicycle.ToString();
+                        break;
+                    case "motorbike":
+                        countMoto++;
+                    lbCountMoto.Text = countMoto.ToString();
+                        break;
+                    case "train":
+                        countTrain++;
+                    lbCountTrain.Text = countTrain.ToString();
+                        break;
+                    case "truck":
+                        countTruck++;
+                    lbCountTruck.Text = countTruck.ToString();
+                        break;
+                    default:
+                   
+                    break;
+                }
 
-
+            }
+        
     }
 }
