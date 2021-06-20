@@ -27,6 +27,7 @@ namespace objectDetection
         const string UNKOWN = "unknown key";
         const string PERSON = "person";
         string filePath = "";
+         private static int count = 0;
         //YOLOv3
         //https://github.com/pjreddie/darknet/blob/master/cfg/yolov3.cfg
         private const string Cfg = "yolov3-tiny.cfg";
@@ -47,22 +48,15 @@ namespace objectDetection
 
         private readonly static string weights = Path.Combine(Location, Weight);
 
-     
-
-      //  private readonly static string configv3 = Path.Combine(Location, Cfgv3);
-
-      //  private readonly static string weightsv3 = Path.Combine(Location, Weightv3);
-
         // Init Yolov3-tiny
-        private readonly static YoloWrapper yoloWrapper = new YoloWrapper(config, weights, label);
-        // Init Yolov3
-    //    private readonly static YoloWrapper yoloV3Wrapper = new YoloWrapper(configv3, weightsv3, label);
+        //  private readonly static YoloWrapper yoloWrapper = new YoloWrapper(config, weights, label);
 
+        private readonly static Scalar colorCount = Scalar.Yellow;
         // Color Random
         private static readonly Scalar[] Colors = Enumerable.Repeat(false, 80).Select(x => Scalar.RandomColor()).ToArray();
       //  int countCar, countBicycle, countBus, countMoto, countTruck, countTrain = 0;
       
-        private static readonly List<string> Labels = File.ReadAllLines(label).ToList();
+        private static readonly List<string> Labels = File.ReadAllLines(label,Encoding.UTF8).ToList();
 
         private void playVideo_Click_1(object sender, EventArgs e)
         {
@@ -95,8 +89,8 @@ namespace objectDetection
             }
             return bitmap;
         }
-
-       void CaptureVideo(object filePathVideo)
+  
+        void CaptureVideo(object filePathVideo)
         {
             // YOLO setting
             int yoloWidth = pictureBoxIpl1.Width, yoloHeight = pictureBoxIpl1.Height;
@@ -106,44 +100,47 @@ namespace objectDetection
             WriteableBitmap wb = new WriteableBitmap(yoloWidth, yoloHeight, 96, 96, PixelFormats.Bgr24, null);
 
             byte[] imageInBytes = new byte[(int)(yoloWidth * yoloHeight * image.Channels())];
-            using (videocapture = new VideoCapture((string)filePathVideo))
+            using(var yoloWrapper = new YoloWrapper(config, weights, label))
             {
-                int sleepTime = (int)Math.Round(1000 / videocapture.Fps);
-                using (Mat imageOriginal = new Mat())
+                using (videocapture = new VideoCapture((string)filePathVideo))
+                {
+                    int sleepTime = (int)Math.Round(1000 / videocapture.Fps);
+                    using (Mat imageOriginal = new Mat())
                     {
-                    while (true)
-                    {
-                        // read a single frame and convert the frame into a byte array
-                  
-                         videocapture.Read(imageOriginal);
-                     
+                        while (true)
+                        {
+                            // read a single frame and convert the frame into a byte array
+
                             videocapture.Read(imageOriginal);
-                   
-                        image = imageOriginal.Resize(new OpenCvSharp.Size(yoloWidth, yoloHeight));
-                        if (image.Empty())
-                            break;
-                        imageInBytes = image.ToBytes();
 
-                        // conduct object detection and display the result
-                        var items = yoloWrapper.Detect(imageInBytes);
+                            videocapture.Read(imageOriginal);
 
-                        // get result         
-                        GetValueInImage(items, image);
-                   
-                        // display the detection result
-                        WriteableBitmapConverter.ToWriteableBitmap(image, wb);
-                        //  pictureBoxIpl1.Image = BitmapFromSource(wb);
-                        Bitmap bitmap = BitmapFromSource(wb);
-                       
-                          SetImage(bitmap);
-                      
-                       
-                        Cv2.WaitKey(0);
-                  
+                            image = imageOriginal.Resize(new OpenCvSharp.Size(yoloWidth, yoloHeight));
+                            if (image.Empty())
+                                break;
+                            imageInBytes = image.ToBytes();
+
+                            // conduct object detection and display the result
+                            var items = yoloWrapper.Detect(imageInBytes);
+                            count = 0;
+                            // get result         
+                            GetValueInImage(items, image);
+                            var countVehicle = $"Vehicle count: {count}";
+                            image.PutText(countVehicle, new OpenCvSharp.Point(0, 50), HersheyFonts.HersheyTriplex, 1.5, colorCount);
+                            // display the detection result
+                            WriteableBitmapConverter.ToWriteableBitmap(image, wb);
+                            //  pictureBoxIpl1.Image = BitmapFromSource(wb);
+                            Bitmap bitmap = BitmapFromSource(wb);
+
+                            SetImage(bitmap);
+                            Cv2.WaitKey(0);
+
+                        }
                     }
+
                 }
-               
             }
+           
         }
 
         delegate void SetImageCallback(Bitmap bitmap);
@@ -188,106 +185,114 @@ namespace objectDetection
             }
 
         }
-      
+
 
         void DetecImage()
         {
 
-             
+            using (var yoloWrapper = new YoloWrapper("yolov3.cfg", "yolov3.weights", "coco.names"))
+            {
+                count = 0;
                 var items = yoloWrapper.Detect(filePath);
+                var org = new Mat(filePath);
+                GetValueInImage(items, org);
+                var countVehicle = $"Vehicle count: {count}";
+                org.PutText(countVehicle, new OpenCvSharp.Point(0, 50), HersheyFonts.HersheyTriplex, 1, colorCount);
+                picBoxImageForDetec.Image = BitmapConverter.ToBitmap(org);
+
+            }
 
             //    var image = Image.FromFile(filePath);
-                var org = new Mat(filePath);
-                   GetValueInImage(items, org);
-                /*  using (var grap = Graphics.FromImage(image))
+
+
+            /*  using (var grap = Graphics.FromImage(image))
+               {
+                   ArrayList listVehicle = new ArrayList();
+                   foreach (var item in items.ToList())
                    {
-                       ArrayList listVehicle = new ArrayList();
-                       foreach (var item in items.ToList())
+                       if (!listVehicle.Contains(item.Type))
                        {
-                           if (!listVehicle.Contains(item.Type))
-                           {
-                               listVehicle.Add(item.Type);
-                           }
-                           if (item.Type != UNKOWN && item.Type != PERSON)
-                           {
-                               switch (item.Type)
-                               {
-                                   case "car":
-                                       countCar++;
-                                       break;
-                                   case "bus":
-                                       countBus++;
-                                       break;
-                                   case "bicycle":
-                                       countBicycle++;
-                                       break;
-                                   case "motorbike":
-                                       countMoto++;
-                                       break;
-                                   case "train":
-                                       countTrain++;
-                                       break;
-                                   case "truck":
-                                       countTruck++;
-                                       break;
-                                   default:
-                                       break;
-                               }
-
-                               using (var pen = new System.Drawing.Pen(System.Drawing.Color.Red, 3))
-                               {
-                                   grap.DrawRectangle(pen, item.X, item.Y, item.Width, item.Height);
-                                   Font font = new Font("Meiryo UI", 15);
-                                   SolidBrush brush = new SolidBrush(System.Drawing.Color.Green);
-                                   grap.DrawString(item.Type.ToString(), font, brush, item.X, item.Y);
-                                   grap.DrawString(Math.Round(item.Confidence * 100).ToString() + "%", new Font("Meiryo UI", 25), new SolidBrush(System.Drawing.Color.Purple), item.X + (item.Width - 50), item.Y + (item.Height / 2));
-                                   grap.Flush();
-                               }
-                           }
-
+                           listVehicle.Add(item.Type);
                        }
-                       int index = 0;
-                       for (int i = 0; i < listVehicle.Count; i++)
+                       if (item.Type != UNKOWN && item.Type != PERSON)
                        {
-
-                           switch (listVehicle[i])
+                           switch (item.Type)
                            {
-
                                case "car":
-                                   grap.DrawString(listVehicle[i] + ": " + countCar, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                                   index += 40;
+                                   countCar++;
                                    break;
                                case "bus":
-                                   grap.DrawString(listVehicle[i] + ": " + countBus, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                                   index += 40;
+                                   countBus++;
                                    break;
                                case "bicycle":
-                                   grap.DrawString(listVehicle[i] + ": " + countBicycle, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                                   index += 40;
+                                   countBicycle++;
                                    break;
                                case "motorbike":
-                                   grap.DrawString(listVehicle[i] + ": " + countMoto, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                                   index += 40;
+                                   countMoto++;
                                    break;
                                case "train":
-                                   grap.DrawString(listVehicle[i] + ": " + countTrain, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                                   index += 40;
+                                   countTrain++;
                                    break;
                                case "truck":
-                                   grap.DrawString(listVehicle[i] + ": " + countTruck, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
-                                   index += 40;
+                                   countTruck++;
                                    break;
                                default:
                                    break;
                            }
 
+                           using (var pen = new System.Drawing.Pen(System.Drawing.Color.Red, 3))
+                           {
+                               grap.DrawRectangle(pen, item.X, item.Y, item.Width, item.Height);
+                               Font font = new Font("Meiryo UI", 15);
+                               SolidBrush brush = new SolidBrush(System.Drawing.Color.Green);
+                               grap.DrawString(item.Type.ToString(), font, brush, item.X, item.Y);
+                               grap.DrawString(Math.Round(item.Confidence * 100).ToString() + "%", new Font("Meiryo UI", 25), new SolidBrush(System.Drawing.Color.Purple), item.X + (item.Width - 50), item.Y + (item.Height / 2));
+                               grap.Flush();
+                           }
                        }
 
-                   }*/
-          
+                   }
+                   int index = 0;
+                   for (int i = 0; i < listVehicle.Count; i++)
+                   {
 
-                picBoxImageForDetec.Image = BitmapConverter.ToBitmap(org);
-            
+                       switch (listVehicle[i])
+                       {
+
+                           case "car":
+                               grap.DrawString(listVehicle[i] + ": " + countCar, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
+                               index += 40;
+                               break;
+                           case "bus":
+                               grap.DrawString(listVehicle[i] + ": " + countBus, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
+                               index += 40;
+                               break;
+                           case "bicycle":
+                               grap.DrawString(listVehicle[i] + ": " + countBicycle, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
+                               index += 40;
+                               break;
+                           case "motorbike":
+                               grap.DrawString(listVehicle[i] + ": " + countMoto, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
+                               index += 40;
+                               break;
+                           case "train":
+                               grap.DrawString(listVehicle[i] + ": " + countTrain, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
+                               index += 40;
+                               break;
+                           case "truck":
+                               grap.DrawString(listVehicle[i] + ": " + countTruck, new Font("Meiryo UI", 24), new SolidBrush(System.Drawing.Color.Red), 0, index);
+                               index += 40;
+                               break;
+                           default:
+                               break;
+                       }
+
+                   }
+
+               }*/
+
+
+
         }
     
         /// <summary>
@@ -302,31 +307,37 @@ namespace objectDetection
         private static void Draw(Mat image, string item, float confidence,  double centerX, double centerY, double width, double height)
         {
             //label formating
+          
             var label = $"{item} {confidence * 100:0.00}%";
             var ranColor = Labels.IndexOf(item);
             //draw result
             image.Rectangle(new OpenCvSharp.Point(centerX, centerY ), new OpenCvSharp.Point(centerX + width, centerY + height), Colors[ranColor], 2);
-            var textSize = Cv2.GetTextSize(label, HersheyFonts.HersheyTriplex, 0.5, 1, out var baseline);
+          var textSize = Cv2.GetTextSize(label, HersheyFonts.HersheyTriplex, 0.5, 1, out var baseline);
             Cv2.Rectangle(image, new Rect(new OpenCvSharp.Point(centerX, centerY - textSize.Height),
-               new OpenCvSharp.Size(textSize.Width, textSize.Height + baseline)), Colors[ranColor], Cv2.FILLED);
+              new OpenCvSharp.Size(textSize.Width, textSize.Height + baseline)), Colors[ranColor], Cv2.FILLED);
             var textColor = Cv2.Mean(Colors[ranColor]).Val0 < 70 ? Scalar.White : Scalar.Black;
-            Cv2.PutText(image, label, new OpenCvSharp.Point(centerX, centerY ), HersheyFonts.HersheyTriplex, 0.5, textColor);
+         
+          
+            Cv2.PutText(image,  label, new OpenCvSharp.Point(centerX, centerY ), HersheyFonts.HersheyTriplex, 0.5, textColor);
         }
+      
 
         private static void GetValueInImage(IEnumerable<Alturos.Yolo.Model.YoloItem> items ,Mat image)
         {
+            
             foreach (var item in items)
             {
                 if (item.Type != UNKOWN && item.Type != PERSON)
                 {
+                    count++;
+                 
                     var x = item.X;
                     var y = item.Y;
                     var width = item.Width;
                     var height = item.Height;
                     var type = item.Type;  // class name of the object
-
-                    // draw a bounding box for the detected object
-                    // you can set different colors for different classes
+                                           // draw a bounding box for the detected object
+                                           // you can set different colors for different classes
                     Draw(image, type, (float)item.Confidence, x, y, width, height);
                 }
             }
